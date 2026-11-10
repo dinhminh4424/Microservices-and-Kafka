@@ -27,7 +27,9 @@ const run = async () => {
         // CÁC GIÁ TRỊ GỬI Ở producer.send
         const { userId, cart } = JSON.parse(value);
 
-        const total = cart.reduce((acc, item) => acc + item.price, 0);
+        const total = cart
+          .reduce((acc, item) => acc + item.price, 0)
+          .toFixed(2);
 
         console.log(` - ANALYTIC CONSUMER: USER : ${userId} - PAID: ${total}`);
       },
