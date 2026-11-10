@@ -1,4 +1,4 @@
-import express from "express";
+import express, { json } from "express";
 import cors from "cors";
 import { Kafka } from "kafkajs";
 
@@ -40,8 +40,13 @@ app.post("/payment-service", async (req, res) => {
   console.log("API ENDPOINT HIT!");
 
   // KAFKA
+  // GỬI ĐẾN CONSUMER
+  await producer.send({
+    topic: "payment-successful",
+    messages: [{ value: JSON.stringify({ userId, cart }) }],
+  });
 
-  res.status(200).send("Payment Successful!  🎉");
+  res.status(200).send(" - Payment Successful!  🎉");
 });
 
 app.use((err, req, res) => {
@@ -51,5 +56,5 @@ app.use((err, req, res) => {
 app.listen(8000, () => {
   connectToKafka();
 
-  console.log("Payment Service is running http://localhost:8000");
+  console.log(" - Payment Service is running http://localhost:8000");
 });
