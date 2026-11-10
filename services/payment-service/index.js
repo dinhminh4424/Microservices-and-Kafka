@@ -12,16 +12,17 @@ app.use(
 
 app.use(express.json());
 
+// KHỞI TẠO TOPIC 'payment-service'
 const kafka = new Kafka({
   clientId: "payment-service",
-  brokers: ["localhost:9094"],
+  brokers: ["localhost:9094", "localhost:9095", "localhost:9096"],
 });
 
-const producer = kafka.producer();
+const producer = kafka.producer(); // KHỞI TẠO PRODUCER (ĐỂ GỬI THÔNG TIN)
 
 const connectToKafka = async () => {
   try {
-    await producer.connect();
+    await producer.connect(); // KẾT NỐI
 
     console.log(" - PRODUCER CONNECTED 🎉");
   } catch (error) {
