@@ -1,7 +1,7 @@
 import { Kafka } from "kafkajs";
 
 const kafka = new Kafka({
-  clientId: "payment-service",
+  clientId: "analytic-service",
   brokers: ["localhost:9094"],
 });
 
@@ -15,7 +15,7 @@ const run = async () => {
 
     // ĐĂNG KÍ VỚI TOPIC
     await consumer.subscribe({
-      topic: "payment-successful",
+      topics: ["payment-successful", "order-successful", "email-successful"],
       fromBeginning: true, // NẾU MẤT KN SAU ĐÓ ONLINE TRỞ LẠI NÓ SẼ LẤY LẠI CÁC TIN NHẮN TỪ KAFKA
     });
 
@@ -24,14 +24,44 @@ const run = async () => {
       eachMessage: async ({ topic, partition, message }) => {
         const value = message.value.toString();
 
-        // CÁC GIÁ TRỊ GỬI Ở producer.send
-        const { userId, cart } = JSON.parse(value);
+        switch (topic) {
+          case "payment-successful": {
+            // CÁC GIÁ TRỊ GỬI Ở producer.send
+            const { userId, cart } = JSON.parse(value);
 
-        const total = cart
-          .reduce((acc, item) => acc + item.price, 0)
-          .toFixed(2);
+            const total = cart
+              .reduce((acc, item) => acc + item.price, 0)
+              .toFixed(2);
 
-        console.log(` - ANALYTIC CONSUMER: USER : ${userId} - PAID: ${total}`);
+            console.log(
+              ` - ANALYTIC CONSUMER FOR TOPIC PAYMENT-SUCCESSFUL: USERID : ${userId} - PAID: ${total}`,
+            );
+
+            break;
+          }
+          case "order-successful": {
+            // CÁC GIÁ TRỊ GỬI Ở producer.send
+            const { userId, orderId } = JSON.parse(value);
+
+            console.log(
+              ` - ANALYTIC CONSUMER FOR TOPIC ORDER-SUCCESSFUL: ORDER CREATED FOR USERID : ${userId} - ORDERID: ${orderId}`,
+            );
+
+            break;
+          }
+          case "email-successful": {
+            // CÁC GIÁ TRỊ GỬI Ở producer.send
+            const { userId, emailId } = JSON.parse(value);
+
+            console.log(
+              ` - ANALYTIC CONSUMER FOR TOPIC EMAIL-SUCCESSFUL: SENDER EMAIL TO USERID : ${userId} - EMAIL: ${emailId}`,
+            );
+
+            break;
+          }
+          default:
+            break;
+        }
       },
     });
   } catch (error) {
